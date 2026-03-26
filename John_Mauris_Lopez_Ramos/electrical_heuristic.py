@@ -7,7 +7,8 @@ import numpy as np
 class ElectricalHeuristic():
 
     def __init__(self, board: HexBoard, player_id, time_limit):
-        self.board = board 
+        self.BOARD = board
+        self.board = board.board
         self.BOARD_SIZE = board.size
         self.player_id = player_id
         self.time_limit = time_limit
@@ -21,7 +22,7 @@ class ElectricalHeuristic():
         border = []
         if self.player_id == 1:
             j = 0 if border_id == 0 else self.BOARD_SIZE - 1
-            border = [(i, j) for i in range(0, self.BOARD_SIZE * self.BOARD_SIZE, self.BOARD_SIZE)]
+            border = [(i, j) for i in range(0, self.BOARD_SIZE)]
         else:
             i = 0 if border_id == 0 else self.BOARD_SIZE - 1
             border = [(i, j) for j in range(0, self.BOARD_SIZE - 1)]
@@ -65,9 +66,9 @@ class ElectricalHeuristic():
                 i = self.cell_to_id(cells[i_])
                 j = self.cell_to_id(cells[j_])
                 if i == j:
-                    self.A[i][j] = sum(self.G[i])
+                    self.A[i_][j_] = sum(self.G[i])
                 else:
-                    self.A[i][j] = -self.G[i][j]
+                    self.A[i_][j_] = -self.G[i][j]
         self.b = []
         for (i, j) in cells:
             self.b.append(self.G[self.cell_to_id((i, j))][self.N - 2])
@@ -78,18 +79,18 @@ class ElectricalHeuristic():
         try:
             self.x = np.linalg.solve(A, b)
         except np.linalg.LinAlgError:
-            print("A debe estar rota")
+            print("Matrix A is probably broken")
             self.x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
 
     def resistance(self):
-        theorem_prover = TheoremProver(self.board, self.player_id)
+        theorem_prover = TheoremProver(self.BOARD, self.player_id)
         self.edges = theorem_prover.main(self.time_limit)
-        self.board_analyzer = BoardAnalyzer(self.board)
+        self.board_analyzer = BoardAnalyzer(self.BOARD)
         self.build_G()
         self.build_A()
         self.solver()
         self.I = 0
         for i in self.north_border:
             self.I += self.G[self.N - 2][i] * (1 - self.x[i])
-        self.R = 1 / self.I
+        self.R =  1e18 if self.I == 0 else 1 / self.I
         return self.R

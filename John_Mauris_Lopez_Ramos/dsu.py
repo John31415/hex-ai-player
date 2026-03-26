@@ -2,8 +2,8 @@ class DSU:
 
     def __init__(self, N):
         self.N = N
-        self.dad = [range(self.N)]
-        self.color = []
+        self.dad = [i for i in range(self.N)]
+        self.color = [0 for _ in range(self.N)]
 
     def find(self, x):
         if x == self.dad[x]:

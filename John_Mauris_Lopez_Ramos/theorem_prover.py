@@ -103,14 +103,17 @@ class TheoremProver():
         if self.dsu.color[x]:
             for q in self.vc_endpoint[x]:
                 # VC - color - VC
-                self.AND(y, carrier, self.vc_carriers[x][q], q)
+                for s in self.vc_carriers[x][q]:
+                    self.AND(y, carrier, s, q)
             for q in self.sc_endpoint[x]:
                 # VC - color - SC
-                self.OR(y, carrier, None, self.sc_carriers[x][q], q)
+                for s in self.sc_carriers[x][q]:
+                    self.OR(y, carrier, None, s, q)
         else:
             for q in self.vc_endpoint[x]:
                 # VC - empty - VC
-                self.OR(y, carrier, x, self.vc_carriers[x][q], q)
+                for s in self.vc_carriers[x][q]:
+                    self.OR(y, carrier, x, s, q)
 
     def main(self, time_limit):
         start_time = time.time()
@@ -118,6 +121,8 @@ class TheoremProver():
         self.base_knowledge()
         eps = 0.1
         while time.time() - start_time < time_limit - eps:
+            if len(self.vc_deque) == 0:
+                break
             (x, y, carrier) = self.vc_deque.popleft()
             self.infer_new_rules(x, y, carrier)
             self.infer_new_rules(y, x, carrier)
@@ -128,5 +133,5 @@ class TheoremProver():
         edges = []
         for i in range(len(self.vc_carriers)):
             for j in range(i+1, len(self.vc_carriers)):
-                edges.append(i, j)
+                edges.append((i, j))
         return edges

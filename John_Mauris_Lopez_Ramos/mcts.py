@@ -5,6 +5,7 @@ from board_analyzer import BoardAnalyzer
 import random
 from electrical_heuristic import ElectricalHeuristic
 import time
+from electric_time_budget import electric_time_budget
 
 class StatesManager:
 
@@ -41,6 +42,7 @@ class StatesManager:
 class MCTS:
     
     def __init__(self, board: HexBoard, player_id):
+        self.BOARD = board
         self.board = board.board
         self.root_player = player_id
         self.total_nodes = 1
@@ -48,6 +50,7 @@ class MCTS:
         self.dag = [[]]
         self.visits = [0]
         self.wins = [0]
+        self.depth = [0]
         self.c = math.sqrt(2)
         self.coordinates = [(-1,-1)]
         self.xor_hashing = XorHashing(board.size)
@@ -76,6 +79,7 @@ class MCTS:
                 best_child_uct = child_uct
                 best_child = child
         self.dad[best_child] = node
+        self.depth[best_child] = self.depth[node] + 1
         return best_child
 
     def selection(self, node, max_childs):
@@ -109,13 +113,15 @@ class MCTS:
         new_hash ^= self.xor_hashing.cell_hash(i, j, self.board[i][j])
         self.hashed_states.append(new_hash)
         self.dad.append(dad_node)
+        self.depth.append(self.depth[dad_node] + 1)
         self.transposition_table[self.hashed_states[node]] = node
         return node
 
     # returns true iff the winner of the simulation is the root player
     def simulation(self, node) -> bool:
-        my_heuristic = ElectricalHeuristic(self.board, self.player[node], self.simulation_time_limit)
-        oponents_heuristic = ElectricalHeuristic(self.board, 3 - self.player[node], self.simulation_time_limit)
+        simulation_time_limit = electric_time_budget(self.remaining_ms, self.depth[node], self.visits[node])
+        my_heuristic = ElectricalHeuristic(self.BOARD, self.player[node], simulation_time_limit)
+        oponents_heuristic = ElectricalHeuristic(self.BOARD, 3 - self.player[node], simulation_time_limit)
         return my_heuristic.resistance() <= oponents_heuristic.resistance()
 
     def backpropagation(self, node, win_leaf):
@@ -158,8 +164,8 @@ class MCTS:
 
     def mcts(self) -> tuple:
         start_time = time.time()
-        time_limit = 0.5
-        self.simulation_time_limit = 0.5
+        time_limit = 4.5
         while time.time() - start_time < time_limit:
+            self.remaining_ms = time_limit - time.time()
             self.create_leaf()
         return self.coordinates[self.best_child(0, 1)]
