@@ -9,6 +9,9 @@ class BoardAnalyzer:
     def get_empty_cells(self):
         return [(i,j) for i in range(self.board_length) for j in range(self.board_length) if self.board[i][j] == 0]
     
+    def get_player_cells(self, player):
+        return [(i,j) for i in range(self.board_length) for j in range(self.board_length) if self.board[i][j] == player]
+    
     def get_occupied_cells(self):
         return [(i,j) for i in range(self.board_length) for j in range(self.board_length) if self.board[i][j] != 0]
     

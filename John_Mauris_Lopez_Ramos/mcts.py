@@ -3,7 +3,7 @@ import math
 from xor_hashing import XorHashing
 from board_analyzer import BoardAnalyzer
 import random
-from heuristic_game_simulation import HeuristicGameSimulation
+from electrical_heuristic import ElectricalHeuristic
 import time
 
 class StatesManager:
@@ -114,8 +114,9 @@ class MCTS:
 
     # returns true iff the winner of the simulation is the root player
     def simulation(self, node) -> bool:
-        heurisitc_game_simulation = HeuristicGameSimulation(self.board, self.player[node])
-        return heurisitc_game_simulation.simulation() == (self.player[node] == self.root_player)
+        my_heuristic = ElectricalHeuristic(self.board, self.player[node], self.simulation_time_limit)
+        oponents_heuristic = ElectricalHeuristic(self.board, 3 - self.player[node], self.simulation_time_limit)
+        return my_heuristic.resistance() <= oponents_heuristic.resistance()
 
     def backpropagation(self, node, win_leaf):
         while node:
@@ -157,8 +158,8 @@ class MCTS:
 
     def mcts(self) -> tuple:
         start_time = time.time()
-        # time_limit = 4.9
         time_limit = 0.5
+        self.simulation_time_limit = 0.5
         while time.time() - start_time < time_limit:
             self.create_leaf()
         return self.coordinates[self.best_child(0, 1)]

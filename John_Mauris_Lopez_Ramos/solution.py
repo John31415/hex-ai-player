@@ -16,13 +16,13 @@ class SmartPlayer(Player):
         empty_cells = analyzer.get_empty_cells()
 
         # returns the optimal move for a small search space
-        if len(empty_cells) < 13 :
-            optimal_player = OptimalPlayer(self.player_id)
-            move = optimal_player.play(board)
-            print("optimal move", move)
-            print(time.time() - start_time)
-            if move != (None, None):
-                return move
+        # if len(empty_cells) < 13 :
+        #     optimal_player = OptimalPlayer(self.player_id)
+        #     move = optimal_player.play(board)
+        #     print("optimal move", move)
+        #     print(time.time() - start_time)
+        #     if move != (None, None):
+        #         return move
         
         mcts = MCTS(board, self.player_id)
 
