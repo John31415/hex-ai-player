@@ -10,9 +10,9 @@ class TheoremProver():
 
     BOARD_SIZE = 0
 
-    def __init__(self, board: HexBoard, player):
-        self.board = board.board
-        self.BOARD_SIZE = board.size
+    def __init__(self, board, player):
+        self.board = board
+        self.BOARD_SIZE = len(self.board)
         self.player = player
         self.dsu = DSU(self.BOARD_SIZE * self.BOARD_SIZE)
         self.board_analyzer = BoardAnalyzer(board)

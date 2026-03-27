@@ -6,26 +6,25 @@ import numpy as np
 
 class ElectricalHeuristic():
 
-    def __init__(self, board: HexBoard, player_id, time_limit):
-        self.BOARD = board
-        self.board = board.board
-        self.BOARD_SIZE = board.size
+    def __init__(self, board, player_id, time_limit):
+        self.board = board
+        self.BOARD_SIZE = len(board)
         self.player_id = player_id
         self.time_limit = time_limit
-        self.N = board.size * board.size + 2
+        self.N = self.BOARD_SIZE * self.BOARD_SIZE + 2
 
     def cell_to_id(self, cell):
         (x, y) = cell
         return x * self.BOARD_SIZE + y
     
-    def get_border(self, border_id):
+    def get_border(self, border_id): 
         border = []
         if self.player_id == 1:
             j = 0 if border_id == 0 else self.BOARD_SIZE - 1
             border = [(i, j) for i in range(0, self.BOARD_SIZE)]
         else:
             i = 0 if border_id == 0 else self.BOARD_SIZE - 1
-            border = [(i, j) for j in range(0, self.BOARD_SIZE - 1)]
+            border = [(i, j) for j in range(0, self.BOARD_SIZE)]
         return border
 
     def build_G(self):
@@ -51,10 +50,22 @@ class ElectricalHeuristic():
             if self.board[i][j] != 3 - self.player_id:
                 assign(self.N - 1, self.cell_to_id((i, j)), self.board[i][j])
 
+    def dfs(self, node_cell):
+        self.visit[node_cell] = True
+        for i in self.board_analyzer.get_neighbors(node_cell):
+            if i not in self.visit:
+                self.dfs(i)
+
     def build_A(self):
-        empty_cells = self.board_analyzer.get_empty_cells()
-        player_cells = self.board_analyzer.get_player_cells(self.player_id)
-        cells = empty_cells + player_cells
+        self.visit = {}
+        for (i, j) in self.get_border(0):
+            if self.board[i][j] != 3 - self.player_id:
+                self.dfs((i, j))
+        cells = []
+        for i in range(self.BOARD_SIZE):
+            for j in range(self.BOARD_SIZE):
+                if (i, j) in self.visit:
+                    cells.append((i, j))                    
         all_north_border = set(self.get_border(0))
         self.north_border = []
         for i in range(len(cells)):
@@ -83,9 +94,9 @@ class ElectricalHeuristic():
             self.x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
 
     def resistance(self):
-        theorem_prover = TheoremProver(self.BOARD, self.player_id)
+        theorem_prover = TheoremProver(self.board, self.player_id)
         self.edges = theorem_prover.main(self.time_limit)
-        self.board_analyzer = BoardAnalyzer(self.BOARD)
+        self.board_analyzer = BoardAnalyzer(self.board)
         self.build_G()
         self.build_A()
         self.solver()

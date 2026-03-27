@@ -12,7 +12,7 @@ class SmartPlayer(Player):
 
         start_time = time.time()
 
-        analyzer = BoardAnalyzer(board)
+        analyzer = BoardAnalyzer(board.board)
         empty_cells = analyzer.get_empty_cells()
 
         # returns the optimal move for a small search space
@@ -24,7 +24,7 @@ class SmartPlayer(Player):
         #     if move != (None, None):
         #         return move
         
-        mcts = MCTS(board, self.player_id)
+        mcts = MCTS(board.board, self.player_id)
 
         move = mcts.mcts()
 
