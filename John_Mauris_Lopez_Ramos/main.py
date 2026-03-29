@@ -12,7 +12,7 @@ def draw(board_obj):
         print()
 
 def game_loop():
-    size = 5 # Puedes probar con 11 que es el estándar
+    size = 7 # Puedes probar con 11 que es el estándar
     board = HexBoard(size)
     p1 = RandomPlayer(1)
     p2 = SmartPlayer(2) # Tu IA

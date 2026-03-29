@@ -33,35 +33,3 @@ class BoardAnalyzer:
                 v = board[r][c]
                 print(". " if v == 0 else ("1 " if v == 1 else "2 "), end="")
             print()
-
-    def check_connection(self, player_id: int) -> bool:
-        """
-        Verifica si el jugador ha conectado sus dos lados (BFS).
-        - Jugador 1 (🔴): conecta col  0 (Izquierda) con col  size-1 (Derecha)
-        - Jugador 2 (🔵): conecta fila 0 (Superior)  con fila size-1 (Inferior)
-        """
-        visited = set()
-        queue = deque()
-
-        # Sembrar BFS desde el borde inicial del jugador
-        for i in range(self.board_length):
-            r, c = (i, 0) if player_id == 1 else (0, i)
-            if self.board[r][c] == player_id:
-                queue.append((r, c))
-                visited.add((r, c))
-
-        while queue:
-            curr_r, curr_c = queue.popleft()
-
-            # Condición de victoria: llegó al borde opuesto
-            if player_id == 1 and curr_c == self.board_length - 1:
-                return True
-            if player_id == 2 and curr_r == self.board_length - 1:
-                return True
-
-            for nr, nc in self.get_neighbors((curr_r, curr_c)):
-                if (nr, nc) not in visited and self.board[nr][nc] == player_id:
-                    visited.add((nr, nc))
-                    queue.append((nr, nc))
-
-        return False
